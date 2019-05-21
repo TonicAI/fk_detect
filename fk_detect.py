@@ -36,15 +36,21 @@ def fk_name_heuristic(columns, primary_keys):
             count_down -= 1
             count = 0
 
+        candidates = []
         for pk in primary_keys:
             if len(pk[2]) != 1:
                 continue
             implied_fk_name = pk[1] + pk[2][0]
             ratio = fuzz.ratio(col_name.lower(), implied_fk_name.lower())
             if ratio > 80:
-                retval.append((col[0], col[1], [col[2]], pk[0], pk[1], pk[2]))
-                break
+                candidates.append((ratio, col[0], col[1], [col[2]], pk[0], pk[1], pk[2]))
+
+        if len(candidates) > 0:
+            candidates = sorted(candidates, key=lambda x: x[0], reverse=True)
+            retval.append(candidates[0][1:])
+
     print('0')
+
     return retval
 
 
