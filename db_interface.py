@@ -23,17 +23,19 @@ class MySqlDbInterface:
 
     def __init__(self, config):
         if not config.no_password:
-            self.__connection = mysql.connector.connect(user=config.user, password=config.password, host=config.host, port=config.port, database=config.db)
+            self.__connection = mysql.connector.connect(user=config.user, password=config.password, host=config.host, port=config.port)
         else:
-            self.__connection = mysql.connector.connect(user=config.user, host=config.host, port=config.port, database=config.db)
+            self.__connection = mysql.connector.connect(user=config.user, host=config.host, port=config.port)
+
+        self.__database = config.db if config.db else None
 
     def get_columns(self):
         cursor = self.__connection.cursor()
         try:
             cursor.execute("""SELECT table_schema, table_name, column_name
                                 FROM information_schema.columns
-                                WHERE table_schema NOT IN {}
-                            """.format(self.__sys_schema_str))
+                                WHERE table_schema NOT IN {} {}
+                            """.format(self.__sys_schema_str, self.__database_clause('columns')))
             return cursor.fetchall()
         finally:
             cursor.close()
@@ -47,15 +49,22 @@ class MySqlDbInterface:
                                     ON CAST(k.constraint_name AS BINARY) = CAST(t.constraint_name AS BINARY)
                                     AND CAST(k.table_schema AS BINARY) = CAST(t.table_schema AS BINARY)
                                     AND CAST(k.table_name AS BINARY) = CAST(t.table_name AS BINARY)
-                                WHERE t.constraint_type='PRIMARY KEY' AND t.table_schema NOT IN {}
+                                WHERE t.constraint_type='PRIMARY KEY' AND t.table_schema NOT IN {} {}
                                 GROUP BY CAST(k.table_schema AS BINARY), CAST(k.table_name AS BINARY);
-                            """.format(self.__sys_schema_str))
+                            """.format(self.__sys_schema_str, self.__database_clause('k')))
             return [(r[0], r[1], r[2].split(',')) for r in cursor.fetchall()]
         finally:
             cursor.close()
 
     def get_foreign_keys(self):
         pass
+
+    def __database_clause(self, tname):
+        database_clause = ''
+        if self.__database:
+            database_clause = 'AND {}.table_schema IN (\'{}\')'.format(tname, self.__database)
+        return database_clause
+
 
 class PostgresDbInterface:
 
