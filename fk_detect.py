@@ -66,12 +66,14 @@ if __name__ == '__main__':
     # remove all foreign keys already reported
     new_fks  = [fk for fk in fk_by_heuristic if fk not in foreign_keys]
 
+    width = 120
     if config.output:
         output_file = open(config.output, "w")
+        width = 4000
         print('Writing discovered foreign keys to ' + config.output)
     else:
         output_file = sys.stdout
-    pprint(new_fks, output_file, width=120)
+    pprint(new_fks, output_file, width=width)
     if config.output:
         output_file.close()
 
