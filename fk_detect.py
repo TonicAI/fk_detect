@@ -43,7 +43,7 @@ def fk_name_heuristic(columns, primary_keys):
             implied_fk_name = pk[1] + pk[2][0]
             ratio = fuzz.ratio(col_name.lower(), implied_fk_name.lower())
             if ratio > 80:
-                candidates.append((ratio, col[0], col[1], [col[2]], pk[0], pk[1], pk[2]))
+                candidates.append((ratio, col[0], col[1], (col[2],), pk[0], pk[1], pk[2]))
 
         if len(candidates) > 0:
             candidates = sorted(candidates, key=lambda x: x[0], reverse=True)
@@ -60,11 +60,11 @@ if __name__ == '__main__':
 
     columns = db.get_columns() # [(schema, table, column), ...]
     primary_keys = db.get_primary_keys() # [(schema, table, [pk_columns, ...]), ...]
-    # foreign_keys = db.get_foreign_keys() # [(fk_schema, fk_table, [fk_columns, ...], target_schema, target_table, [target_columns, ...]), ...]
+    foreign_keys = set(db.get_foreign_keys()) # [(fk_schema, fk_table, [fk_columns, ...], target_schema, target_table, [target_columns, ...]), ...]
 
     fk_by_heuristic = fk_name_heuristic(columns, primary_keys)
-    pprint(fk_by_heuristic)
-
+    new_fks  = [fk for fk in fk_by_heuristic if fk not in foreign_keys]
+    pprint(new_fks)
 
     # detect foreign keys
     #   take all primary keys and create patterns like, table + '_' + pk_column or table + pk_column
