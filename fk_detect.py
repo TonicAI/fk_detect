@@ -16,7 +16,7 @@ def parse_args():
         action='store_true')
     parser.add_argument('--ssl', help='force the connection over SSL', action='store_true')
     parser.add_argument('-d', '--db', help='database to connect to (optional in MySQL)')
-    parser.add_argument('-i', '--input', help='starting file', required=False)
+    parser.add_argument('-o', '--output', help='output file, stdout is default', required=False)
     return parser.parse_args()
 
 def fk_name_heuristic(columns, primary_keys):
@@ -63,18 +63,15 @@ if __name__ == '__main__':
     foreign_keys = set(db.get_foreign_keys()) # [(fk_schema, fk_table, [fk_columns, ...], target_schema, target_table, [target_columns, ...]), ...]
 
     fk_by_heuristic = fk_name_heuristic(columns, primary_keys)
+    # remove all foreign keys already reported
     new_fks  = [fk for fk in fk_by_heuristic if fk not in foreign_keys]
-    pprint(new_fks)
 
-    # detect foreign keys
-    #   take all primary keys and create patterns like, table + '_' + pk_column or table + pk_column
-    #   iterate across tables and look for columns that match this primary key patterns
-    #   skip multicolumn fks
-
-    # union foreign key constraints
-    #   set union
-    # union input file
-    #   set union
-
-    # write output file
+    if config.output:
+        output_file = open(config.output, "w")
+        print('Writing discovered foreign keys to ' + config.output)
+    else:
+        output_file = sys.stdout
+    pprint(new_fks, output_file, width=120)
+    if config.output:
+        output_file.close()
 
