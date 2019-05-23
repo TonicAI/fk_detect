@@ -17,6 +17,7 @@ def parse_args():
     parser.add_argument('--ssl', help='force the connection over SSL', action='store_true')
     parser.add_argument('-d', '--db', help='database to connect to (optional in MySQL)')
     parser.add_argument('-o', '--output', help='output file, stdout is default', required=False)
+    parser.add_argument('-U', '--union-constraints', action='store_true', help='output proposed foreign keys unioned with known foreign key constraints. By default fk_detect does not output foreign keys represented as constraints in the database. Enabling this switch will union them to the proposed constraints.')
     return parser.parse_args()
 
 def fk_name_heuristic(columns, primary_keys):
@@ -63,8 +64,12 @@ if __name__ == '__main__':
     foreign_keys = set(db.get_foreign_keys()) # [(fk_schema, fk_table, [fk_columns, ...], target_schema, target_table, [target_columns, ...]), ...]
 
     fk_by_heuristic = fk_name_heuristic(columns, primary_keys)
-    # remove all foreign keys already reported
-    new_fks  = [fk for fk in fk_by_heuristic if fk not in foreign_keys]
+    if config.union_constraints:
+        # union foreign keys recorded as constraints
+        new_fks = [set(fk_by_heuristic).union(foreign_keys)]
+    else:
+        # remove all foreign keys already recorded as constraints
+        new_fks = [fk for fk in fk_by_heuristic if fk not in foreign_keys]
 
     width = 120
     if config.output:
