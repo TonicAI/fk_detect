@@ -3,11 +3,16 @@ import sys, os, psycopg2, mysql.connector
 def get_db_interface(config):
 
     if not config.no_password:
-        if 'FK_DETECT_PASSWORD' not in os.environ:
-            print('please provide a DB password by setting FK_DETECT_PASSWORD environment variable, or setting --no-password')
+        if not config.password_file:
+            print('please provide a password file using --password-file')
             sys.exit(1)
-
-        config.password = os.environ["FK_DETECT_PASSWORD"]
+        try:
+            f = open(config.password_file, 'r')
+            line = f.readline()
+            config.password = line.strip()
+        except:
+            print('missing or invalid password file, "{}"'.format(config.password_file))
+            sys.exit(1)
 
     if config.dbtype.lower() == 'mysql':
         return MySqlDbInterface(config)

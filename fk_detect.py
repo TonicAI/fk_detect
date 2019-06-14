@@ -12,8 +12,9 @@ def parse_args():
     parser.add_argument('-H', '--host', help='host to connect to', required=True)
     parser.add_argument('-p', '--port', help='port to connect to', required=True)
     parser.add_argument('-u', '--user', help='user to connect with', required=True)
-    parser.add_argument('--no-password', help='connect without a password. otherwise provide one with FK_DETECT_PASSWORD environment variable',
+    parser.add_argument('--no-password', help='connect without a password. otherwise provide onethrough a file with --password-file',
         action='store_true')
+    parser.add_argument('--password-file', help='location of a file that contains the password to the database, see README.md for format')
     parser.add_argument('--ssl', help='force the connection over SSL', action='store_true')
     parser.add_argument('-d', '--db', help='database to connect to (optional in MySQL)')
     parser.add_argument('-o', '--output', help='output file, stdout is default', required=False)
