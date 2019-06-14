@@ -38,6 +38,14 @@ optional arguments:
                         proposed constraints.
 ```
 
+# Example
+
+Example, using Postgres:
+
+```
+$ python fk_detect -t postgres -H localhost -p 5432 -u user -d test_data --password-file password-file
+```
+
 # Password file format
 
 Use a single line with nothing but the password in it, e.g., if your password is `hunter2`, the following file should be used:
