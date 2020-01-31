@@ -105,7 +105,7 @@ class PostgresDbInterface:
                                 FROM pg_attribute att
                                 JOIN pg_class cl ON cl.oid = att.attrelid
                                 JOIN pg_namespace ns ON ns.oid = cl.relnamespace
-                                WHERE att.attnum > 0 AND ns.nspname NOT IN {0} AND cl.relkind = 'r'
+                                WHERE att.attnum > 0 AND ns.nspname NOT IN {0} AND cl.relkind = 'r' AND att.attisdropped = false
                             """.format(self.__sys_schemas))
             return cursor.fetchall()
 
