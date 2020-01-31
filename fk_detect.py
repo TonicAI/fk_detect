@@ -1,4 +1,4 @@
-import argparse, sys
+import argparse, sys, json
 import db_interface
 from fuzzywuzzy import fuzz
 from pprint import pprint
@@ -67,19 +67,22 @@ if __name__ == '__main__':
     fk_by_heuristic = fk_name_heuristic(columns, primary_keys)
     if config.union_constraints:
         # union foreign keys recorded as constraints
-        new_fks = [set(fk_by_heuristic).union(foreign_keys)]
+        new_fks = list(set(fk_by_heuristic).union(foreign_keys))
     else:
         # remove all foreign keys already recorded as constraints
         new_fks = [fk for fk in fk_by_heuristic if fk not in foreign_keys]
 
-    width = 120
+    # convert to tonic format
+    tonic_format_fks = [{'fk_schema': record[0], 'fk_table': record[1], 'fk_columns': record[2],
+        'target_schema': record[3], 'target_table': record[4], 'target_columns': record[5]} for record in new_fks]
+
     if config.output:
         output_file = open(config.output, "w")
-        width = 4000
         print('Writing discovered foreign keys to ' + config.output)
     else:
         output_file = sys.stdout
-    pprint(new_fks, output_file, width=width)
+    json.dump(tonic_format_fks, output_file, indent=4, sort_keys=True)
+    print('', file=output_file)
     if config.output:
         output_file.close()
 
