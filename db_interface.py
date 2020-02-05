@@ -51,14 +51,14 @@ class MySqlDbInterface:
     def get_primary_keys(self):
         cursor = self.__connection.cursor()
         try:
-            cursor.execute("""SELECT k.table_schema, k.table_name, group_concat(k.column_name)
+            cursor.execute("""SELECT k.table_schema COLLATE 'utf8_bin', k.table_name COLLATE 'utf8_bin', group_concat(k.column_name)
                                 FROM information_schema.table_constraints t
                                 JOIN information_schema.key_column_usage k
-                                    ON CAST(k.constraint_name AS BINARY) = CAST(t.constraint_name AS BINARY)
-                                    AND CAST(k.table_schema AS BINARY) = CAST(t.table_schema AS BINARY)
-                                    AND CAST(k.table_name AS BINARY) = CAST(t.table_name AS BINARY)
+                                    ON k.constraint_name COLLATE 'utf8_bin' = t.constraint_name COLLATE 'utf8_bin'
+                                    AND k.table_schema COLLATE 'utf8_bin' = t.table_schema COLLATE 'utf8_bin'
+                                    AND k.table_name COLLATE 'utf8_bin' = t.table_name COLLATE 'utf8_bin'
                                 WHERE t.constraint_type='PRIMARY KEY' AND t.table_schema NOT IN {} {}
-                                GROUP BY CAST(k.table_schema AS BINARY), CAST(k.table_name AS BINARY);
+                                GROUP BY k.table_schema COLLATE 'utf8_bin', k.table_name COLLATE 'utf8_bin';
                             """.format(self.__sys_schema_str, self.__database_clause('k')))
             return tupleize([(r[0], r[1], r[2].split(',')) for r in cursor.fetchall()])
         finally:
@@ -67,14 +67,14 @@ class MySqlDbInterface:
     def get_foreign_keys(self):
         cursor = self.__connection.cursor()
         try:
-            cursor.execute("""SELECT k.table_schema, k.table_name, group_concat(k.column_name ORDER BY k.ordinal_position), k.referenced_table_schema, k.referenced_table_name, group_concat(k.referenced_column_name)
+            cursor.execute("""SELECT k.table_schema COLLATE 'utf8_bin', k.table_name COLLATE 'utf8_bin', group_concat(k.column_name ORDER BY k.ordinal_position), k.referenced_table_schema COLLATE 'utf8_bin', k.referenced_table_name COLLATE 'utf8_bin', group_concat(k.referenced_column_name)
                                 FROM information_schema.table_constraints t
                                 JOIN information_schema.key_column_usage k
-                                  ON CAST(k.constraint_name AS BINARY) = CAST(t.constraint_name AS BINARY)
-                                 AND CAST(k.table_schema AS BINARY) = CAST(t.table_schema AS BINARY)
-                                 AND CAST(k.table_name AS BINARY) = CAST(t.table_name AS BINARY)
+                                  ON k.constraint_name COLLATE 'utf8_bin' = t.constraint_name COLLATE 'utf8_bin'
+                                 AND k.table_schema COLLATE 'utf8_bin' = t.table_schema COLLATE 'utf8_bin'
+                                 AND k.table_name COLLATE 'utf8_bin' = t.table_name COLLATE 'utf8_bin'
                                 WHERE t.constraint_type='FOREIGN KEY' {}
-                                GROUP BY 1, 2, 4, 5;""".format(self.__database_clause('k')))
+                                GROUP BY k.table_schema COLLATE 'utf8_bin', k.table_name COLLATE 'utf8_bin', k.referenced_table_schema COLLATE 'utf8_bin', k.referenced_table_name COLLATE 'utf8_bin';""".format(self.__database_clause('k')))
             return tupleize([(r[0], r[1], r[2].split(','), r[3], r[4], r[5].split(',')) for r in cursor.fetchall()])
         finally:
             cursor.close()
