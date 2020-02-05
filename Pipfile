@@ -5,6 +5,9 @@ verify_ssl = true
 
 [dev-packages]
 pylint = "*"
+mypy = "*"
+pycodestyle = "*"
+yapf = "*"
 
 [packages]
 fuzzywuzzy = "*"

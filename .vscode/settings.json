@@ -1,0 +1,8 @@
+{
+    "python.pythonPath": "/Users/jgoodnow/.local/share/virtualenvs/fk_detect-arDRPMW2/bin/python",
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": true,
+    "python.linting.mypyEnabled": false,
+    "python.linting.pycodestyleEnabled": true,
+    "python.formatting.provider": "yapf"
+}
